@@ -18,13 +18,18 @@ class UserResponseSchema(BaseModel):
     status_code: int
 
 class UserLoginSchema(BaseModel):
-    emaiL: str
+    email: EmailStr
     password: str
 
 
-class UserResponseLoginSchema(UserSchema):
+class UserResponseLoginSchema(BaseModel):
+    full_name: str
+    email: EmailStr
     profile_pic: str | None
+    access_token: str
+    refresh_token: str
+    expires_at: int
 
-    model_config = {
-        "from_attributes": True
-    }
+    # model_config = {
+    #     "from_attributes": True
+    # }

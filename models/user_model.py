@@ -1,9 +1,16 @@
+from enum import Enum
 from typing import Optional
 
+from sqlalchemy import Enum as SQLALCHEMY_ENUM
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import AbstractBaseUser
+
+
+class SignInProvider(Enum):
+    GOOGLE = "google"
+    PASSWORD = "password"
 
 
 class User(AbstractBaseUser):
@@ -11,6 +18,9 @@ class User(AbstractBaseUser):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     profile_pic: Mapped[Optional[str]] = mapped_column(String(100))
+    provider: Mapped[Enum] = mapped_column(
+        SQLALCHEMY_ENUM(SignInProvider), nullable=False, default=SignInProvider.PASSWORD
+    )
     is_admin: Mapped[bool] = mapped_column(default=False)
 
     def __init__(
@@ -26,3 +36,7 @@ class User(AbstractBaseUser):
         self.email = email
         self.password = self.hash_password(password)
         profile_pic = profile_pic
+
+    @property
+    def get_fullname(self) -> str:
+        return f"{self.last_name} {self.first_name}"

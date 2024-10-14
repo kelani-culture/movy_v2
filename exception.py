@@ -3,5 +3,14 @@ class MovyBaseApiException(Exception):
         self.message = message
         super().__init__(message)
 
-class UserAlreadyExistException(MovyBaseApiException):
-    ...
+
+class UserAlreadyExistException(MovyBaseApiException): ...
+
+
+class InvalidEmailOrPassword(MovyBaseApiException): ...
+
+
+class AccountDisabled(MovyBaseApiException): ...
+
+
+class EmailNotVerified(MovyBaseApiException): ...
