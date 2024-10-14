@@ -1,8 +1,36 @@
-from fastapi import FastAPI
-from routers.users import routers as user_router
+from typing import Callable
 
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+
+from exception import MovyBaseApiException, UserAlreadyExistException
+from routers.users import routers as user_router
 
 app = FastAPI()
 
 
 app.include_router(user_router)
+
+
+def create_exception_handler(
+    status_code: int, err_msg: str
+) -> Callable[[Request, MovyBaseApiException], JSONResponse]:
+    detail = {"message": err_msg}
+
+    async def exception_handler(_: Request, exc: MovyBaseApiException) -> JSONResponse:
+        if exc.message:
+            detail["message"] = exc.message
+
+        return JSONResponse(
+            status_code=status_code, content={"message": detail["message"]}
+        )
+
+    return exception_handler
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=UserAlreadyExistException,
+    handler=create_exception_handler(
+        status_code=status.HTTP_400_BAD_REQUEST, err_msg="User already exist"
+    ),
+)

@@ -1,4 +1,6 @@
+import uuid
 from datetime import datetime
+from typing import Optional
 
 from nanoid import generate
 from passlib.context import CryptContext
@@ -16,8 +18,8 @@ class AbstractBaseUser(Base):
     """
 
     __abstract__ = True
-    id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True, nullable=False, index=True
+    id: Mapped[str] = mapped_column(
+        String(100), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True
     )
     u_id: Mapped[str] = mapped_column(
         String(21),
@@ -31,17 +33,13 @@ class AbstractBaseUser(Base):
     created_at: Mapped[datetime] = mapped_column(
         nullable=False, server_default=func.now()
     )
-    updated_at: Mapped[datetime] = mapped_column(onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=func.now())
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     is_verified: Mapped[bool] = mapped_column(default=False)
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    def __init__(self, email: str, password: str):
-        self.emai = email
-        self.password = self.hash_password(password)
-
     def hash_password(self, password) -> str:
-        return pwd_context.hash(self.password)
+        return pwd_context.hash(password)
 
     def verify_password(self, raw_pass: str) -> bool:
         return pwd_context.verify(raw_pass, self.password)

@@ -12,3 +12,5 @@ class Theatre(AbstractBaseUser):
     description: Mapped[str] = mapped_column(
         Text, nullable=True, doc="This columns hold the description about the cinema"
     )
+
+    profile_pic: Mapped[str] = mapped_column(String(100))
