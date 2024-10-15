@@ -5,10 +5,13 @@ from fastapi.responses import JSONResponse
 
 from exception import (
     AccountDisabled,
+    BearerNotFoundInParsedToken,
     EmailNotVerified,
+    InvalidAccessTokenProvided,
     InvalidEmailOrPassword,
     MovyBaseApiException,
     UserAlreadyExistException,
+    UserNotFound,
 )
 from routers.users import routers as user_router
 
@@ -64,4 +67,29 @@ app.add_exception_handler(
         status_code=status.HTTP_400_BAD_REQUEST,
         err_msg="Your email not yet verified please contact admin",
     ),
+)
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=InvalidAccessTokenProvided,
+    handler=create_exception_handler(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        err_msg="Invalid token provided",
+    ),
+)
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=BearerNotFoundInParsedToken,
+    handler=create_exception_handler(
+        status_code=status.HTTP_401_UNAUTHORIZED, err_msg="Invalid token provided"
+    ),
+)
+
+app.add_exception_handler(
+    exc_class_or_status_code=UserNotFound,
+    handler=create_exception_handler(
+        status_code=status.HTTP_404_NOT_FOUND,
+        err_msg="Invalid token provided"
+    )
 )

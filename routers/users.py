@@ -8,7 +8,7 @@ from schemas.user_schema import (
     UserResponseSchema,
     UserSignUpSchema,
 )
-from services.auth import create_user, user_login
+from services.auth import create_user, get_current_user_or_theatre, user_login
 
 routers = APIRouter(prefix="/user/auth", tags=["User Auth"])
 
@@ -30,3 +30,8 @@ async def login(user: UserLoginSchema, db: Session = Depends(get_db)):
     info = await user_login(db, **user.model_dump())
     return UserResponseLoginSchema(**info)
 
+
+#TODO delete routes after testing if endpoint is protected
+@routers.get("/protected-route-motherfucker")
+def protected(user=Depends(get_current_user_or_theatre)):
+    return ("It's bloody protected y'all")
