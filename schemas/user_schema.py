@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
 
@@ -7,6 +7,7 @@ class UserSchema(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+
 
 
 
@@ -39,3 +40,19 @@ class TokenPayload(BaseModel):
     name: str
     email: EmailStr
     role: List[str]
+
+
+# theatre schema
+class TheatreSignUpSchema(BaseModel):
+    theatre_name: str
+    email: EmailStr
+    password: str
+
+
+class TheatreResponseLoginSchema(BaseModel):
+    theatre_name: str
+    email: str
+    profile_pic: Optional[str] = None
+    access_token: str
+    refresh_token: str
+    expires_at: int

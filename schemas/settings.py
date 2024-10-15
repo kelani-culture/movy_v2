@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     local_db: str
     local_db_password: str
     local_hostname: str
-    
+
     access_token_secret_key: str
     refresh_token_secret_key: str
 

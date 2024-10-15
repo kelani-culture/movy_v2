@@ -78,7 +78,7 @@ async def user_login(
     if type_user == "user":
         user_token["full_name"] = user.get_fullname
     else:
-        user_token["theatre_name"] = user.get_name
+        user_token["theatre_name"] = user.get_fullname
 
     user_token["email"] = user.email
     user_token["profile_pic"] = user.profile_pic

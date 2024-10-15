@@ -14,11 +14,12 @@ from exception import (
     UserNotFound,
 )
 from routers.users import routers as user_router
-
+from routers.theatre import routers as theatre_router
 app = FastAPI()
 
 
 app.include_router(user_router)
+app.include_router(theatre_router)
 
 
 def create_exception_handler(
