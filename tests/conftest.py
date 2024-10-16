@@ -1,4 +1,8 @@
+from ctypes.wintypes import RGB
+import os
+from pathlib import Path
 import pytest
+from PIL import Image
 from fastapi.testclient import TestClient
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
@@ -47,3 +51,21 @@ def db_session(setup_database):
     finally:
         session.rollback()
         session.close()
+
+def create_image(image_file: str):
+    image = Image.new("RGB", (100, 100), color="blue")
+    image.save(image_file)
+
+@pytest.fixture
+def test_image_file():
+    # Create a dummy test image file
+
+    file_path = "test_image.jpg"
+    create_image(file_path)
+    # file_path = Path("test_image.jpg")
+    # with open(file_path, "wb") as f:
+    #     f.write(os.urandom(1024))# Dummy content for testing
+    # yield file_path
+    # file_path.unlink()  # Clean up the file after the test
+    # return file_path
+

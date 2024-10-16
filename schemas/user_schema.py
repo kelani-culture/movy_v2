@@ -19,6 +19,10 @@ class UserResponseSchema(BaseModel):
     message: str
     status_code: int
 
+class ProfilePicResponse(BaseModel):
+    profile_path: str
+    message: str
+    status_code: int
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str

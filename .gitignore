@@ -8,6 +8,7 @@ __pycache__/
 *env
 *.test.env
 env*
+profile_pic
 # Distribution / packaging
 .Python
 build/

@@ -1,7 +1,10 @@
+import shutil
+from datetime import datetime
 from typing import Dict
 
-from fastapi import Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, UploadFile
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from PIL import Image, UnidentifiedImageError
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -9,12 +12,14 @@ from exception import (
     AccountDisabled,
     BearerNotFoundInParsedToken,
     EmailNotVerified,
+    ImageErrorException,
     InvalidEmailOrPassword,
     UserAlreadyExistException,
     UserNotFound,
 )
 from models.theatre_model import Theatre
 from models.user_model import User
+from schemas.settings import UPLOAD_DIRECTORY
 from utils.token import decode_user_token, generate_user_token
 
 USER_TYPE_MODEL = {"user": User, "theatre": Theatre}
@@ -105,3 +110,35 @@ def get_current_user_or_theatre(
         raise UserNotFound("User email not registered")
 
     return user
+
+
+def update_profile_pic(
+    db: Session, file: UploadFile, obj: User | Theatre
+) -> str:
+    """
+    handle user profile update
+    """
+    try:
+        image = Image.open(file.file)
+        image.verify()
+    except UnidentifiedImageError:
+        raise ImageErrorException("Invalid image file")
+
+    # reset the upload file
+    file.file.seek(0)
+
+    file_location = (
+        UPLOAD_DIRECTORY / f"{datetime.date(datetime.now())}"
+    )
+    file_location.mkdir(exist_ok=True)
+
+    file_location = file_location / file.filename
+    with file_location.open("wb") as pic:
+        shutil.copyfileobj(file.file, pic)
+
+    relative_path = file_location.relative_to(UPLOAD_DIRECTORY.parent)
+    obj.profile_pic = str(relative_path)
+    db.commit()
+    db.refresh(obj)
+
+    return obj.profile_pic
