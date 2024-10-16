@@ -65,9 +65,7 @@ class TestTheatreAuth:
             "status_code": 201,
         }
 
-    def test_create_theatre_unsuccessful(
-        self, client, db_session, theatre
-    ):
+    def test_create_theatre_unsuccessful(self, client, db_session, theatre):
         """
         test create theatre unsuccessful
         """
@@ -182,20 +180,20 @@ class TestTheatreAuth:
         assert os.path.exists(response.json()["profile_path"])
 
         os.remove(response.json()["profile_path"])
-    
+
     def test_theatre_upload_invalid_image(self, client, auth_theatre):
-            """
-            test invalid file upload
-            """
-            with open(self.fake_file, "rb") as f:
-                response = client.patch(
-                    "/theatre/upload-profile-image",
-                    files={"pic": (self.fake_file, f, "image/jpeg")},
-                    headers={"Authorization": f"Bearer {auth_theatre}"},
-                )
-            assert response.status_code == 400
-            assert response.json() == {"message": "Invalid image file"}
-    
+        """
+        test invalid file upload
+        """
+        with open(self.fake_file, "rb") as f:
+            response = client.patch(
+                "/theatre/upload-profile-image",
+                files={"pic": (self.fake_file, f, "image/jpeg")},
+                headers={"Authorization": f"Bearer {auth_theatre}"},
+            )
+        assert response.status_code == 400
+        assert response.json() == {"message": "Invalid image file"}
+
     def test_unauthenticate_user_upload_file(self, client, db_session, theatre):
         """
         test unauthenticated theatre upload
