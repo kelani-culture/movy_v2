@@ -35,6 +35,16 @@ def create_user(db: Session, type_user: str = "user", **kwargs):
     model = USER_TYPE_MODEL[type_user]
     user = db.query(model).filter(model.email == kwargs["email"]).one_or_none()
 
+    if type_user == "user": # check if email exist in theatre table
+        theatre = db.query(Theatre).filter(Theatre.email == kwargs["email"]).first()
+        if theatre:
+            raise UserAlreadyExistException("This email has already been taken")
+
+    elif type_user == "theatre": # check if email exist in user table
+        user_check = db.query(User).filter(User.email == kwargs["email"]).first()
+        if user_check:
+            raise UserAlreadyExistException("This email has already been taken")
+
     if user:
         raise UserAlreadyExistException(
             "User email already exists please proceed to login"
@@ -104,7 +114,7 @@ def get_current_user_or_theatre(
 
     user = db.query(User).filter(User.email == user_info.email).one_or_none()
     if not user:
-        user = db.query(User).filter(User.email == user_info.email).one_or_none()
+        user = db.query(Theatre).filter(Theatre.email == user_info.email).one_or_none()
 
     if not user:
         raise UserNotFound("User email not registered")
@@ -113,7 +123,7 @@ def get_current_user_or_theatre(
 
 
 def update_profile_pic(
-    db: Session, file: UploadFile, obj: User | Theatre
+    db: Session, file: UploadFile, obj: User | Theatre, type_user: str = "user"
 ) -> str:
     """
     handle user profile update
@@ -127,10 +137,8 @@ def update_profile_pic(
     # reset the upload file
     file.file.seek(0)
 
-    file_location = (
-        UPLOAD_DIRECTORY / f"{datetime.date(datetime.now())}"
-    )
-    file_location.mkdir(exist_ok=True)
+    file_location = UPLOAD_DIRECTORY / type_user / f"{datetime.date(datetime.now())}"
+    file_location.mkdir(exist_ok=True, parents=True)
 
     file_location = file_location / file.filename
     with file_location.open("wb") as pic:

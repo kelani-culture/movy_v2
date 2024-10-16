@@ -40,7 +40,7 @@ async def login(user: UserLoginSchema, db: Session = Depends(get_db)):
     return UserResponseLoginSchema(**info)
 
 
-@profile.patch("/upload-profile-pic", status_code=200)
+@profile.patch("/upload-profile-image", status_code=200)
 async def profile_picture(
     pic: UploadFile = File(...),
     db: Session = Depends(get_db),

@@ -172,7 +172,7 @@ class TestUserAuth:
         """
         with open(self.image_path, "rb") as f:
             response = client.patch(
-                "/user/upload-profile-pic",
+                "/user/upload-profile-image",
                 files={"pic": (self.image_path, f, "image/jpeg")},
                 headers={"Authorization": f"Bearer {auth_user}"},
             )
@@ -187,7 +187,7 @@ class TestUserAuth:
         """
         with open(self.file, "rb") as f:
             response = client.patch(
-                "/user/upload-profile-pic",
+                "/user/upload-profile-image",
                 files={"pic": (self.file, f, "image/jpeg")},
                 headers={"Authorization": f"Bearer {auth_user}"},
             )
@@ -205,7 +205,7 @@ class TestUserAuth:
 
         with open(self.image_path, "rb") as f:
             response = client.patch(
-                "/user/upload-profile-pic",
+                "/user/upload-profile-image",
                 files={"pic": (self.image_path, f, "image/jpeg")},
                 # headers={"Authorization": f"Bearer {auth_user}"},
             )

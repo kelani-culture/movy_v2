@@ -15,7 +15,7 @@ from exception import (
     UserAlreadyExistException,
     UserNotFound,
 )
-from routers.theatre import routers as theatre_router
+from routers.theatre import routers as theatre_router, profile_routers as theatre_profile_routes
 from routers.users import routers as user_router, profile as user_profile_routes
 from schemas.settings import UPLOAD_DIRECTORY, STATIC_DIRECTORY
 
@@ -24,6 +24,7 @@ app = FastAPI()
 
 app.include_router(user_router)
 app.include_router(user_profile_routes)
+app.include_router(theatre_profile_routes)
 app.include_router(theatre_router)
 
 
