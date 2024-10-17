@@ -18,20 +18,6 @@ def user():
     }
 
 
-@pytest.fixture
-def auth_user(db_session, client, user):
-    user_d = User(**user)
-    user_d.is_verified = True  # Set user as verified
-    db_session.add(user_d)
-    db_session.commit()  # Commit the user to the session
-
-    # Check if the user was saved correctly
-    db_session.refresh(user_d)  # Refresh to get updated state from the database
-
-    url = "/user/auth/login"
-    user_login_data = {"email": user["email"], "password": user["password"]}
-    resp = client.post(url, json=user_login_data)
-    return resp.json()["access_token"]
 
 
 class TestUserAuth:
@@ -210,5 +196,4 @@ class TestUserAuth:
                 # headers={"Authorization": f"Bearer {auth_user}"},
             )
         assert response.status_code == 403
-        print(response.json())
         assert response.json() == {"detail": "Not authenticated"}

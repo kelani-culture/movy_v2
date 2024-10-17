@@ -1,36 +1,8 @@
 import os
 
-import pytest
-from faker import Faker
 from PIL import Image
 
 from models.theatre_model import Theatre
-
-
-@pytest.fixture
-def theatre():
-    faker = Faker()
-    return {
-        "theatre_name": faker.company(),
-        "email": faker.company_email(),
-        "password": faker.password(),
-    }
-
-
-@pytest.fixture
-def auth_theatre(db_session, client, theatre):
-    user_d = Theatre(**theatre)
-    user_d.is_verified = True  # Set user as verified
-    db_session.add(user_d)
-    db_session.commit()  # Commit the user to the session
-
-    # Check if the user was saved correctly
-    db_session.refresh(user_d)  # Refresh to get updated state from the database
-
-    url = "/theatre/auth/login"
-    user_login_data = {"email": theatre["email"], "password": theatre["password"]}
-    resp = client.post(url, json=user_login_data)
-    return resp.json()["access_token"]
 
 
 class TestTheatreAuth:
