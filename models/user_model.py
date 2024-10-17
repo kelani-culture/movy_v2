@@ -40,3 +40,6 @@ class User(AbstractBaseUser):
     @property
     def get_fullname(self) -> str:
         return f"{self.last_name} {self.first_name}"
+    
+    def __str__(self):
+        return f"{self.last_name} - {self.first_name}"

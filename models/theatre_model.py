@@ -58,6 +58,9 @@ class Theatre(AbstractBaseUser):
     @property
     def get_fullname(self) -> str:
         return self.name
+    
+    def __str__(self):
+        return self.name
 
 
 class Address(Base):
@@ -72,3 +75,6 @@ class Address(Base):
     theatres: Mapped[List[Theatre]] = relationship(
         secondary=theatre_address, back_populates="addresses"
     )
+
+    def __str__(self):
+        return f"{self.street_address} - {self.city} - {self.state}"
