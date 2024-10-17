@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models.theatre_model import Theatre
+from schemas.theatre_schema import TheatreResponse, TheatreAddressSchema
 from schemas.user_schema import (
     ProfilePicResponse,
     TheatreResponseLoginSchema,
@@ -18,10 +19,11 @@ from services.auth import (
     update_profile_pic,
     user_login,
 )
+from services.theatre import create_theatre_address
 
-routers = APIRouter(prefix="/theatre/auth", tags=["THEATRE Auth"])
+routers = APIRouter(prefix="/theatre/auth", tags=["Theatre Auth"])
 
-profile_routers = APIRouter(prefix="/theatre", tags=["THEATRE PROFILE"])
+profile_routers = APIRouter(prefix="/theatre", tags=["Theatre Profile"])
 
 
 @routers.post("/signup", response_model=UserResponseSchema, status_code=201)
@@ -57,3 +59,15 @@ async def theatre_profile_image_upload(
         message="Theatre profile update successfully",
         status_code=200,
     )
+
+
+@profile_routers.post(
+    "/theatre-address", response_model=TheatreResponse, status_code=201
+)
+def theatre_address(
+    data: TheatreAddressSchema,
+    db: Session = Depends(get_db),
+    theatre: Theatre = Depends(get_current_user_or_theatre),
+):
+    theatre = create_theatre_address(db, data.model_dump(), theatre)
+    return theatre
