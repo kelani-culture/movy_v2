@@ -20,7 +20,7 @@ from exception import (
 from models.theatre_model import Theatre
 from models.user_model import User
 from schemas.settings import UPLOAD_DIRECTORY
-from utils.token import decode_user_token, generate_user_token
+from utils.jwt_token import decode_user_token, generate_user_token
 
 USER_TYPE_MODEL = {"user": User, "theatre": Theatre}
 

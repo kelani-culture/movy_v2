@@ -1,7 +1,6 @@
 from typing import List, Optional
+
 from pydantic import BaseModel
-
-
 
 
 class TheatreAddressSchema(BaseModel):
@@ -9,7 +8,6 @@ class TheatreAddressSchema(BaseModel):
     street_address: str
     city: str
     state: str
-
 
 
 class AddressSchema(BaseModel):

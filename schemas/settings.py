@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     local_db_password: str
     local_hostname: str
 
+    tmdb_access_token: str
+    tmdb_api_key: str
+
     access_token_secret_key: str
     refresh_token_secret_key: str
 

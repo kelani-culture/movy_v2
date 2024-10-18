@@ -38,6 +38,7 @@ class Theatre(AbstractBaseUser):
     provider: Mapped[Enum] = mapped_column(
         SQLALCHEMY_ENUM(TheatreSignInEnum), default=TheatreSignInEnum.PASSWORD
     )
+    is_admin: Mapped[bool] = mapped_column(default=True)
 
     def __init__(
         self,
@@ -58,7 +59,7 @@ class Theatre(AbstractBaseUser):
     @property
     def get_fullname(self) -> str:
         return self.name
-    
+
     def __str__(self):
         return self.name
 

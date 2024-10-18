@@ -12,23 +12,23 @@ from database import Base
 movie_genres = Table(
     "movie_genres",
     Base.metadata,
-    Column("genre_id", ForeignKey("genres.id")),
-    Column("movie_id", ForeignKey("movies.id")),
+    Column("genre_id", ForeignKey("genres.id"), nullable=False),
+    Column("movie_id", ForeignKey("movies.id"), nullable=False),
 )
 
-movie_casts = Table(
-    "movie_casts",
-    Base.metadata,
-    Column("cast_id", ForeignKey("casts.id")),
-    Column("movie_id", ForeignKey("movies.id")),
-)
+# movie_casts = Table(
+#     "movie_casts",
+#     Base.metadata,
+#     Column("cast_id", ForeignKey("casts.id")),
+#     Column("movie_id", ForeignKey("movies.id")),
+# )
 
-movie_directors = Table(
-    "movie_directors",
-    Base.metadata,
-    Column("director_id", ForeignKey("directors.id")),
-    Column("movie_id", ForeignKey("movies.id")),
-)
+# movie_directors = Table(
+#     "movie_directors",
+#     Base.metadata,
+#     Column("director_id", ForeignKey("directors.id")),
+#     Column("movie_id", ForeignKey("movies.id")),
+# )
 
 
 class MovieStatus(Enum):
@@ -43,11 +43,13 @@ class Movie(Base):
         default=lambda: generate(), unique=True, nullable=False
     )
     title: Mapped[str] = mapped_column(String(100), index=True)
-    tags: Mapped[str] = mapped_column(String(50), nullable=True, index=True)
+    tagline: Mapped[str] = mapped_column(String(200), nullable=True, index=True)
     summary: Mapped[str] = mapped_column(Text, nullable=True, index=True)
-    trailer_link: Mapped[str] = mapped_column(String(100))
+    trailer_link: Mapped[str] = mapped_column(String(100), nullable=True)
     duration_in_min: Mapped[str] = mapped_column(String(200))
     release_date: Mapped[date] = mapped_column(index=True)
+    poster_path: Mapped[str] = mapped_column(String(100), nullable=True)
+    backdrop_path: Mapped[str] = mapped_column(String(100), nullable=True)
     added_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
@@ -58,15 +60,15 @@ class Movie(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, onupdate=func.now(), nullable=True
     )
-    casts: Mapped[List["Cast"]] = relationship(
-        secondary=movie_casts, back_populates="movies"
-    )
+    # casts: Mapped[List["Cast"]] = relationship(
+    #     secondary=movie_casts, back_populates="movies"
+    # )
     genres: Mapped[List["Genre"]] = relationship(
         secondary=movie_genres, back_populates="movies"
     )
-    directors: Mapped[List["Director"]] = relationship(
-        secondary=movie_directors, back_populates="movies"
-    )
+    # directors: Mapped[List["Director"]] = relationship(
+    #     secondary=movie_directors, back_populates="movies"
+    # )
 
     def __str__(self):
         return self.title
@@ -81,9 +83,9 @@ class Cast(Base):
     name: Mapped[str] = mapped_column(String(50), index=True)
     profile_path: Mapped[str] = mapped_column(String(100), nullable=True)
 
-    movies: Mapped[List[Movie]] = relationship(
-        secondary=movie_casts, back_populates="casts"
-    )
+    # movies: Mapped[List[Movie]] = relationship(
+    #     secondary=movie_casts, back_populates="casts"
+    # )
 
     def __str__(self):
         return self.name
@@ -94,9 +96,9 @@ class Director(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50), index=True)
     profile_path: Mapped[str] = mapped_column(String(100), nullable=True)
-    movies: Mapped[List[Movie]] = relationship(
-        secondary=movie_directors, back_populates="directors"
-    )
+    # movies: Mapped[List[Movie]] = relationship(
+    #     secondary=movie_directors, back_populates="directors"
+    # )
 
     def __str__(self):
         return self.name
@@ -105,7 +107,7 @@ class Director(Base):
 class Genre(Base):
     __tablename__ = "genres"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(10))
+    name: Mapped[str] = mapped_column(String(20), unique=True)
     movies: Mapped[List[Movie]] = relationship(
         secondary=movie_genres, back_populates="genres"
     )

@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from dateutil import tz
 from typing import Dict
 
 import jwt
+from dateutil import tz
 from jwt.exceptions import InvalidAudienceError, InvalidTokenError
 
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from exception import AccountDisabled, InvalidAccessTokenProvided
 from models.theatre_model import Theatre
 from models.user_model import User
@@ -52,7 +53,7 @@ def generate_user_token(user: User | Theatre, type_user: str) -> Dict[str, str |
         if type_user == "theatre"
         else "admin",
     )
-    gmt = tz.gettz('GMT')
+    gmt = tz.gettz("GMT")
     access_token_data = {
         "iss": "http://localhost:8000",
         "iat": int(datetime.now(tz=gmt).timestamp()),
@@ -100,7 +101,10 @@ def decode_user_token(token: str) -> TokenPayload:
     """
     try:
         payload = jwt.decode(
-            token, setting.access_token_secret_key, algorithms=[ALGORITHM], audience=EXPECTED_AUDIENCE
+            token,
+            setting.access_token_secret_key,
+            algorithms=[ALGORITHM],
+            audience=EXPECTED_AUDIENCE,
         )
         user_info = payload.get("user", {})
         if not user_info:

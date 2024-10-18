@@ -21,7 +21,6 @@ class User(AbstractBaseUser):
     provider: Mapped[Enum] = mapped_column(
         SQLALCHEMY_ENUM(SignInProvider), nullable=False, default=SignInProvider.PASSWORD
     )
-    is_admin: Mapped[bool] = mapped_column(default=False)
 
     def __init__(
         self,
@@ -40,6 +39,6 @@ class User(AbstractBaseUser):
     @property
     def get_fullname(self) -> str:
         return f"{self.last_name} {self.first_name}"
-    
+
     def __str__(self):
         return f"{self.last_name} - {self.first_name}"
