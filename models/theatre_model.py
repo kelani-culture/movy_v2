@@ -78,7 +78,7 @@ class Theatre(AbstractBaseUser):
         return self.name
 
     theatre_halls: Mapped[List["TheatreHall"]] = relationship(
-        "TheatreHall", back_populates="theatre_halls"
+        "TheatreHall", back_populates="theatre"
     )
 
 
@@ -105,7 +105,7 @@ class TheatreHall(Base):
     name: Mapped[str] = mapped_column(String(20), unique=True)
 
     capacity: Mapped[int]
-    total_rows: Mapped[int] = mapped_column(default=0)
+    total_row: Mapped[int] = mapped_column(default=0)
     seats_per_row: Mapped[int] = mapped_column(default=0)
 
     theatre_id: Mapped[str] = mapped_column(ForeignKey("theatres.id"))
@@ -124,8 +124,8 @@ class TheatreHall(Base):
 class Seat(Base):
     __tablename__ = "seats"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    rows: Mapped[str] = mapped_column(String(1))
-    seats: Mapped[int]
+    row_name: Mapped[str] = mapped_column(String(1))
+    seat: Mapped[int]
 
     status: Mapped[Enum] = mapped_column(
         SQLALCHEMY_ENUM(SeatStatus), default=SeatStatus.AVAILABLE
@@ -137,5 +137,5 @@ class Seat(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint("theatre_hall_id", "rows", name="uq_theatre_hall_row"),
+        UniqueConstraint("row_name", "seat", "theatre_hall_id", name="uq_theatre_hall_id_row_name_seat_row"),
     )

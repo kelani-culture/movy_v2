@@ -35,12 +35,12 @@ def create_user(db: Session, type_user: str = "user", **kwargs):
     model = USER_TYPE_MODEL[type_user]
     user = db.query(model).filter(model.email == kwargs["email"]).one_or_none()
 
-    if type_user == "user": # check if email exist in theatre table
+    if type_user == "user":  # check if email exist in theatre table
         theatre = db.query(Theatre).filter(Theatre.email == kwargs["email"]).first()
         if theatre:
             raise UserAlreadyExistException("This email has already been taken")
 
-    elif type_user == "theatre": # check if email exist in user table
+    elif type_user == "theatre":  # check if email exist in user table
         user_check = db.query(User).filter(User.email == kwargs["email"]).first()
         if user_check:
             raise UserAlreadyExistException("This email has already been taken")

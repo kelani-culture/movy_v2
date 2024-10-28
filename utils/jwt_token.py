@@ -108,11 +108,9 @@ def decode_user_token(token: str) -> TokenPayload:
         )
         user_info = payload.get("user", {})
         if not user_info:
-            print(user_info)
             raise InvalidAccessTokenProvided("Invalid token provided or token expired")
 
         if not payload.get("is_active"):
-            print("user_info")
             raise AccountDisabled("User account has been disabled please contact admin")
 
         user = TokenPayload(**user_info)

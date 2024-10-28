@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, computed_field, field_validator
 
 
 class TheatreAddressSchema(BaseModel):
@@ -8,6 +8,18 @@ class TheatreAddressSchema(BaseModel):
     street_address: str
     city: str
     state: str
+
+
+class TheatreSeats(BaseModel):
+    id: int
+    row_name: str
+    seat: int
+
+
+class TheatreHallsResponse(BaseModel):
+    id: int
+    capacity: int
+    seats: List[TheatreSeats]
 
 
 class AddressSchema(BaseModel):
@@ -22,6 +34,8 @@ class TheatreResponse(BaseModel):
     name: str
     description: str
     addresses: List[AddressSchema]
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TheatreHall(BaseModel):
@@ -52,3 +66,9 @@ class TheatreHall(BaseModel):
 class TheatreMovieStream(BaseModel):
     title: str
     summary: str
+
+
+class TheatreInfo(TheatreResponse):
+    theatre_halls: List[TheatreHallsResponse]
+
+    model_config = ConfigDict(from_attributes=True)

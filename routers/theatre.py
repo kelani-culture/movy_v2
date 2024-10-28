@@ -1,11 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models.theatre_model import Theatre
-from schemas.theatre_schema import TheatreResponse, TheatreAddressSchema
+from schemas.theatre_schema import (
+    TheatreAddressSchema,
+    TheatreHall,
+    TheatreInfo,
+    TheatreResponse,
+)
 from schemas.user_schema import (
     ProfilePicResponse,
     TheatreResponseLoginSchema,
@@ -19,7 +25,11 @@ from services.auth import (
     update_profile_pic,
     user_login,
 )
-from services.theatre import create_theatre_address
+from services.theatre import (
+    create_theatre_address,
+    create_theatre_halls_seats,
+    get_theatre_detail,
+)
 
 routers = APIRouter(prefix="/theatre/auth", tags=["Theatre Auth"])
 
@@ -73,9 +83,36 @@ def theatre_address(
     return theatre
 
 
+# @profile_routers.post(
+#     "/movie"
+# )
+# def theatre_movie_streams():
+#     ...
+
 
 @profile_routers.post(
-    "/movie"
+    "/theatre-hall/create", response_model=TheatreResponse, status_code=201
 )
-def theatre_movie_streams():
-    ...
+def create_theatre_hall(
+    data: TheatreHall,
+    db: Session = Depends(get_db),
+    theatre: Theatre = Depends(get_current_user_or_theatre),
+):
+    """
+    create theatre movie hall including seats
+    """
+    create_theatre_halls_seats(db, data.model_dump(), theatre)
+    message = {"message": "Theatre created successful", "status_code": 201}
+    return JSONResponse(content=message, status_code=status.HTTP_201_CREATED)
+
+
+@profile_routers.get("/theatre-info", response_model=TheatreInfo)
+def get_theatre_info(
+    db: Session = Depends(get_db),
+    theatre: Theatre = Depends(get_current_user_or_theatre),
+):
+    """
+    get all info about a theatre
+    """
+    theatre = get_theatre_detail(db, theatre)
+    return theatre
