@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, HttpUrl, computed_field, field_validator
 
 
 class TheatreAddressSchema(BaseModel):
@@ -8,8 +9,6 @@ class TheatreAddressSchema(BaseModel):
     street_address: str
     city: str
     state: str
-
-
 
 
 class AddressSchema(BaseModel):
@@ -56,8 +55,13 @@ class TheatreHall(BaseModel):
 # theatre movie streaming...
 class TheatreMovieStream(BaseModel):
     title: str
-    summary: str
-    
+    summary: Optional[str] = None
+    duration_in_min: int
+    genres: List[str]
+    trailer_link: HttpUrl
+    tagline: Optional[str] = None
+    release_date: datetime
+
 
 
 # theatre hall
@@ -71,6 +75,8 @@ class TheatreHallsResponse(BaseModel):
     id: int
     capacity: int
     seats: List[TheatreSeats]
+
+
 class TheatreInfo(TheatreResponse):
     theatre_halls: List[TheatreHallsResponse]
 

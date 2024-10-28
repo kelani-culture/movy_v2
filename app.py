@@ -15,9 +15,11 @@ from exception import (
     UserAlreadyExistException,
     UserNotFound,
 )
-from routers.theatre import routers as theatre_router, profile_routers as theatre_profile_routes
-from routers.users import routers as user_router, profile as user_profile_routes
-from schemas.settings import UPLOAD_DIRECTORY, STATIC_DIRECTORY
+from routers.theatre import profile_routers as theatre_profile_routes
+from routers.theatre import routers as theatre_router
+from routers.users import profile as user_profile_routes
+from routers.users import routers as user_router
+from schemas.settings import STATIC_DIRECTORY
 
 app = FastAPI()
 
@@ -31,7 +33,7 @@ app.include_router(theatre_router)
 # static file location
 
 
-app.mount("/profile_pic", StaticFiles(directory=UPLOAD_DIRECTORY), name="profile_pic")
+# app.mount("/profile_pic", StaticFiles(directory=UPLOAD_DIRECTORY), name="profile_pic")
 app.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
 
 

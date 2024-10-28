@@ -6,10 +6,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-UPLOAD_DIRECTORY: Path = BASE_DIR / Path("profile_pic")
+# UPLOAD_DIRECTORY: Path = BASE_DIR / Path("profile_pic")
 
-UPLOAD_DIRECTORY.mkdir(exist_ok=True)
-STATIC_DIRECTORY = Path("static")
+# UPLOAD_DIRECTORY.mkdir(exist_ok=True)
+STATIC_DIRECTORY = BASE_DIR / Path("static")
 STATIC_DIRECTORY.mkdir(exist_ok=True, parents=True)
 
 

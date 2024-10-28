@@ -1,14 +1,20 @@
+from datetime import date, datetime
 from enum import Enum
+from time import time
 from typing import List, Optional
 
+from .movie_model import Movie
+from nanoid import generate
 from sqlalchemy import (
-    Column,
     CheckConstraint,
+    Column,
     ForeignKey,
     String,
     Table,
     Text,
     UniqueConstraint,
+    func,
+    Time
 )
 from sqlalchemy import Enum as SQLALCHEMY_ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -112,7 +118,7 @@ class TheatreHall(Base):
     theatre: Mapped[Theatre] = relationship(Theatre, back_populates="theatre_halls")
     seats: Mapped[List["Seat"]] = relationship("Seat", back_populates="theatre_halls")
 
-    showtime = relationship("ShowTime", back_populates="theatre_halls")
+    showtime: Mapped["ShowTime"] = relationship("ShowTime", back_populates="theatre_halls")
     __table_args__ = (
         CheckConstraint("total_rows >= 0", name="check_total_rows_non_negative"),
         CheckConstraint("seats_per_row >= 0", name="check_seats_per_row_non_negative"),
@@ -138,5 +144,31 @@ class Seat(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint("row_name", "seat", "theatre_hall_id", name="uq_theatre_hall_id_row_name_seat_row"),
+        UniqueConstraint(
+            "row_name",
+            "seat",
+            "theatre_hall_id",
+            name="uq_theatre_hall_id_row_name_seat_row",
+        ),
+    )
+
+
+class ShowTime(Base):
+    __tablename__ = "show_time"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    u_id: Mapped[str] = mapped_column(
+        String(100), default=lambda: generate(), unique=True
+    )
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    theatre_hall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
+    stream_date: Mapped[date] = mapped_column(nullable=False)
+    start_time: Mapped[time] = mapped_column(Time, nullable=False)
+    end_time: Mapped[time] = mapped_column(Time, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(onupdate=True)
+
+    movies: Mapped[List[Movie]] = relationship(Movie, back_populates="showtime")
+    theatre_halls: Mapped[List[TheatreHall]] = relationship(
+        TheatreHall, back_populates="showtime"
     )

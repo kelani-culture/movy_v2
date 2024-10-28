@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -10,6 +10,7 @@ from schemas.theatre_schema import (
     TheatreAddressSchema,
     TheatreHall,
     TheatreInfo,
+    TheatreMovieStream,
     TheatreResponse,
 )
 from schemas.user_schema import (
@@ -116,3 +117,16 @@ def get_theatre_info(
     """
     theatre = get_theatre_detail(db, theatre)
     return theatre
+
+
+@profile_routers.post("/theatre-movie/create")
+def theatre_create_movies(
+    data: Annotated[TheatreMovieStream, Form(...)],
+    poster_path: Annotated[UploadFile, Form(...)],
+    backdrop_path: Annotated[UploadFile, Form(...)],
+    db: Session = Depends(get_db),
+    theatre: Theatre = Depends(get_current_user_or_theatre)
+):
+    """
+    create theatre movie routes
+    """

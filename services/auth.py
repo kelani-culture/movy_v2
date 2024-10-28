@@ -19,7 +19,7 @@ from exception import (
 )
 from models.theatre_model import Theatre
 from models.user_model import User
-from schemas.settings import UPLOAD_DIRECTORY
+from schemas.settings import STATIC_DIRECTORY
 from utils.jwt_token import decode_user_token, generate_user_token
 
 USER_TYPE_MODEL = {"user": User, "theatre": Theatre}
@@ -137,14 +137,19 @@ def update_profile_pic(
     # reset the upload file
     file.file.seek(0)
 
-    file_location = UPLOAD_DIRECTORY / type_user / f"{datetime.date(datetime.now())}"
+    file_location = (
+        STATIC_DIRECTORY
+        / "profile_pic"
+        / type_user
+        / f"{datetime.date(datetime.now())}"
+    )
     file_location.mkdir(exist_ok=True, parents=True)
 
     file_location = file_location / file.filename
     with file_location.open("wb") as pic:
         shutil.copyfileobj(file.file, pic)
 
-    relative_path = file_location.relative_to(UPLOAD_DIRECTORY.parent)
+    relative_path = file_location.relative_to(STATIC_DIRECTORY.parent)
     obj.profile_pic = str(relative_path)
     db.commit()
     db.refresh(obj)
