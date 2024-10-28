@@ -112,6 +112,7 @@ class TheatreHall(Base):
     theatre: Mapped[Theatre] = relationship(Theatre, back_populates="theatre_halls")
     seats: Mapped[List["Seat"]] = relationship("Seat", back_populates="theatre_halls")
 
+    showtime = relationship("ShowTime", back_populates="theatre_halls")
     __table_args__ = (
         CheckConstraint("total_rows >= 0", name="check_total_rows_non_negative"),
         CheckConstraint("seats_per_row >= 0", name="check_seats_per_row_non_negative"),

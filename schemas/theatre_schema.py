@@ -10,16 +10,6 @@ class TheatreAddressSchema(BaseModel):
     state: str
 
 
-class TheatreSeats(BaseModel):
-    id: int
-    row_name: str
-    seat: int
-
-
-class TheatreHallsResponse(BaseModel):
-    id: int
-    capacity: int
-    seats: List[TheatreSeats]
 
 
 class AddressSchema(BaseModel):
@@ -63,11 +53,24 @@ class TheatreHall(BaseModel):
         return v
 
 
+# theatre movie streaming...
 class TheatreMovieStream(BaseModel):
     title: str
     summary: str
+    
 
 
+# theatre hall
+class TheatreSeats(BaseModel):
+    id: int
+    row_name: str
+    seat: int
+
+
+class TheatreHallsResponse(BaseModel):
+    id: int
+    capacity: int
+    seats: List[TheatreSeats]
 class TheatreInfo(TheatreResponse):
     theatre_halls: List[TheatreHallsResponse]
 

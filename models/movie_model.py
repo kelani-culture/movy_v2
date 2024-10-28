@@ -66,6 +66,8 @@ class Movie(Base):
     genres: Mapped[List["Genre"]] = relationship(
         secondary=movie_genres, back_populates="movies"
     )
+
+    showtime = relationship("ShowTime", back_populates="movies")
     # directors: Mapped[List["Director"]] = relationship(
     #     secondary=movie_directors, back_populates="movies"
     # )
