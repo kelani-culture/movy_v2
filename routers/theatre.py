@@ -71,3 +71,11 @@ def theatre_address(
 ):
     theatre = create_theatre_address(db, data.model_dump(), theatre)
     return theatre
+
+
+
+@profile_routers.post(
+    "/movie"
+)
+def theatre_movie_streams():
+    ...

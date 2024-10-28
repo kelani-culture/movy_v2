@@ -39,8 +39,8 @@ class MovieStatus(Enum):
 class Movie(Base):
     __tablename__ = "movies"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    u_id: Mapped[str] = mapped_column(String(100),
-        default=lambda: generate(), unique=True, nullable=False
+    u_id: Mapped[str] = mapped_column(
+        String(100), default=lambda: generate(), unique=True, nullable=False
     )
     title: Mapped[str] = mapped_column(String(100), index=True)
     tagline: Mapped[str] = mapped_column(String(200), nullable=True, index=True)
@@ -72,10 +72,13 @@ class Movie(Base):
 
     def __str__(self):
         return self.title
-    
+
     __table_args__ = (
-        Index('ix_movies_summary', 'summary', mysql_length=255),  # specify key length for MySQL
+        Index(
+            "ix_movies_summary", "summary", mysql_length=255
+        ),  # specify key length for MySQL
     )
+
 
 class Cast(Base):
     __tablename__ = "casts"

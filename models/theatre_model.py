@@ -1,7 +1,15 @@
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import Column, ForeignKey, String, Table, Text
+from sqlalchemy import (
+    Column,
+    CheckConstraint,
+    ForeignKey,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy import Enum as SQLALCHEMY_ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,6 +23,12 @@ class TheatreSignInEnum(Enum):
     INSTAGRAM = "instagram"
     X = "x"
     FACEBOOK = "Facebook"
+
+
+class SeatStatus(Enum):
+    AVAILABLE = "Available"
+    RESERVED = "Reserved"
+    BOOKED = "Booked"
 
 
 theatre_address = Table(
@@ -63,6 +77,10 @@ class Theatre(AbstractBaseUser):
     def __str__(self):
         return self.name
 
+    theatre_halls: Mapped[List["TheatreHall"]] = relationship(
+        "TheatreHall", back_populates="theatre_halls"
+    )
+
 
 class Address(Base):
     __tablename__ = "address"
@@ -79,3 +97,45 @@ class Address(Base):
 
     def __str__(self):
         return f"{self.street_address} - {self.city} - {self.state}"
+
+
+class TheatreHall(Base):
+    __tablename__ = "theatre_halls"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(20), unique=True)
+
+    capacity: Mapped[int]
+    total_rows: Mapped[int] = mapped_column(default=0)
+    seats_per_row: Mapped[int] = mapped_column(default=0)
+
+    theatre_id: Mapped[str] = mapped_column(ForeignKey("theatres.id"))
+    theatre: Mapped[Theatre] = relationship(Theatre, back_populates="theatre_halls")
+    seats: Mapped[List["Seat"]] = relationship("Seat", back_populates="theatre_halls")
+
+    __table_args__ = (
+        CheckConstraint("total_rows >= 0", name="check_total_rows_non_negative"),
+        CheckConstraint("seats_per_row >= 0", name="check_seats_per_row_non_negative"),
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Seat(Base):
+    __tablename__ = "seats"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    rows: Mapped[str] = mapped_column(String(1))
+    seats: Mapped[int]
+
+    status: Mapped[Enum] = mapped_column(
+        SQLALCHEMY_ENUM(SeatStatus), default=SeatStatus.AVAILABLE
+    )
+
+    theatre_hall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
+    theatre_halls: Mapped[TheatreHall] = relationship(
+        TheatreHall, back_populates="seats"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("theatre_hall_id", "rows", name="uq_theatre_hall_row"),
+    )
