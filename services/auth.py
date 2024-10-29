@@ -1,10 +1,8 @@
-import shutil
 from datetime import datetime
 from typing import Dict
 
 from fastapi import Depends, UploadFile
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from PIL import Image, UnidentifiedImageError
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -12,7 +10,6 @@ from exception import (
     AccountDisabled,
     BearerNotFoundInParsedToken,
     EmailNotVerified,
-    ImageErrorException,
     InvalidEmailOrPassword,
     UserAlreadyExistException,
     UserNotFound,
@@ -20,6 +17,7 @@ from exception import (
 from models.theatre_model import Theatre
 from models.user_model import User
 from schemas.settings import STATIC_DIRECTORY
+from utils.handle_image import image_upload
 from utils.jwt_token import decode_user_token, generate_user_token
 
 USER_TYPE_MODEL = {"user": User, "theatre": Theatre}
@@ -128,14 +126,14 @@ def update_profile_pic(
     """
     handle user profile update
     """
-    try:
-        image = Image.open(file.file)
-        image.verify()
-    except UnidentifiedImageError:
-        raise ImageErrorException("Invalid image file")
+    # try:
+    #     image = Image.open(file.file)
+    #     image.verify()
+    # except UnidentifiedImageError:
+    #     raise ImageErrorException("Invalid image file")
 
-    # reset the upload file
-    file.file.seek(0)
+    # # reset the upload file
+    # file.file.seek(0)
 
     file_location = (
         STATIC_DIRECTORY
@@ -143,14 +141,14 @@ def update_profile_pic(
         / type_user
         / f"{datetime.date(datetime.now())}"
     )
-    file_location.mkdir(exist_ok=True, parents=True)
+    # file_location.mkdir(exist_ok=True, parents=True)
 
-    file_location = file_location / file.filename
-    with file_location.open("wb") as pic:
-        shutil.copyfileobj(file.file, pic)
+    # file_location = file_location / file.filename
+    # with file_location.open("wb") as pic:
+    #     shutil.copyfileobj(file.file, pic)
 
-    relative_path = file_location.relative_to(STATIC_DIRECTORY.parent)
-    obj.profile_pic = str(relative_path)
+    # relative_path = file_location.relative_to(STATIC_DIRECTORY.parent)
+    obj.profile_pic = image_upload(file_location, file)
     db.commit()
     db.refresh(obj)
 

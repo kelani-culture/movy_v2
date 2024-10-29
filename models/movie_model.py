@@ -31,9 +31,9 @@ movie_genres = Table(
 # )
 
 
-class MovieStatus(Enum):
-    RELEASED = "released"
-    UPCOMING = "upcoming"
+class MovieStatus(str, Enum):
+    RELEASED = "RELEASED"
+    UPCOMING = "UPCOMING"
 
 
 class Movie(Base):
@@ -55,7 +55,10 @@ class Movie(Base):
     )
 
     status: Mapped[Enum] = mapped_column(
-        SQLALCHEMY_ENUM(MovieStatus), nullable=False, index=True
+        SQLALCHEMY_ENUM(MovieStatus),
+        nullable=False,
+        index=True,
+        default=MovieStatus.RELEASED,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, onupdate=func.now(), nullable=True
@@ -67,6 +70,7 @@ class Movie(Base):
         secondary=movie_genres, back_populates="movies"
     )
 
+    # from .theatre_model import ShowTime
     showtime = relationship("ShowTime", back_populates="movies")
     # directors: Mapped[List["Director"]] = relationship(
     #     secondary=movie_directors, back_populates="movies"

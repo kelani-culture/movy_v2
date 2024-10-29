@@ -3,7 +3,7 @@ from enum import Enum
 from time import time
 from typing import List, Optional
 
-from .movie_model import Movie
+
 from nanoid import generate
 from sqlalchemy import (
     CheckConstraint,
@@ -12,9 +12,9 @@ from sqlalchemy import (
     String,
     Table,
     Text,
+    Time,
     UniqueConstraint,
     func,
-    Time
 )
 from sqlalchemy import Enum as SQLALCHEMY_ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -22,6 +22,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
 from .base import AbstractBaseUser
+from .movie_model import Movie
+from .user_model import User
 
 
 class TheatreSignInEnum(Enum):
@@ -31,10 +33,10 @@ class TheatreSignInEnum(Enum):
     FACEBOOK = "Facebook"
 
 
-class SeatStatus(Enum):
-    AVAILABLE = "Available"
-    RESERVED = "Reserved"
-    BOOKED = "Booked"
+class SeatStatus(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    RESERVED = "RESERVED"
+    BOOKED = "BOOKED"
 
 
 theatre_address = Table(
@@ -118,7 +120,10 @@ class TheatreHall(Base):
     theatre: Mapped[Theatre] = relationship(Theatre, back_populates="theatre_halls")
     seats: Mapped[List["Seat"]] = relationship("Seat", back_populates="theatre_halls")
 
-    showtime: Mapped["ShowTime"] = relationship("ShowTime", back_populates="theatre_halls")
+    booking: Mapped["Booking"] = relationship(Theatre, back_populates="theatre_halls")
+    showtime: Mapped["ShowTime"] = relationship(
+        "ShowTime", back_populates="theatre_halls"
+    )
     __table_args__ = (
         CheckConstraint("total_rows >= 0", name="check_total_rows_non_negative"),
         CheckConstraint("seats_per_row >= 0", name="check_seats_per_row_non_negative"),
@@ -142,6 +147,7 @@ class Seat(Base):
     theatre_halls: Mapped[TheatreHall] = relationship(
         TheatreHall, back_populates="seats"
     )
+    booking: Mapped["Booking"] = relationship("Booking", back_populates="seats")
 
     __table_args__ = (
         UniqueConstraint(
@@ -166,9 +172,44 @@ class ShowTime(Base):
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(onupdate=True)
+    updated_at: Mapped[datetime] = mapped_column(onupdate=func.now())
+    booking: Mapped["Booking"] = relationship("Booking", back_populates="showtime")
 
     movies: Mapped[List[Movie]] = relationship(Movie, back_populates="showtime")
     theatre_halls: Mapped[List[TheatreHall]] = relationship(
         TheatreHall, back_populates="showtime"
     )
+
+
+class BookingStatus(str, Enum):
+    CANCELED = "CANCELED"
+    SOLD = "SOLD"
+    PENDING = "PENDING"
+
+class Booking(Base):
+    __tablename__ = "booking"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    booking_status: Mapped[str] = mapped_column(String(8), nullable=False, default=BookingStatus.PENDING)
+    showtime_id: Mapped[int] = mapped_column(ForeignKey("show_time.id"))
+    seat_id: Mapped[int] = mapped_column(ForeignKey("seats.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    theatre_hall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
+
+    added_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+    user: Mapped[List[User]] = relationship(User,  backref="booking")
+    theatre_halls: Mapped[TheatreHall] = relationship(Theatre, back_populates="booking")
+    seats: Mapped[List[Seat]] = relationship(Seat, back_populates="booking")
+    showtime: Mapped[ShowTime] = relationship(ShowTime, back_populates="booking")
+    ticket: Mapped["Booking"] = relationship("Booking", back_populates="booking")
+
+
+class Ticket(Base):
+    __tablename__ = "ticket"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    issued_at: Mapped[datetime] = mapped_column(onupdate=func.now())
+    expires_at: Mapped[datetime] = mapped_column()
+    token: Mapped[str] = mapped_column(String(200))
+    booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"), nullable=True)
+
+    booking: Mapped[Booking] = relationship(Booking, back_populates="ticket")

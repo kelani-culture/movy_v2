@@ -121,7 +121,11 @@ class TMDB:
                 movie_obj = Movie(**detail)
                 session.add(movie_obj)
                 for genre in movie_d["genres"]:
-                    q = session.query(Genre).filter(Genre.name == genre["name"]).one_or_none()
+                    q = (
+                        session.query(Genre)
+                        .filter(Genre.name == genre["name"])
+                        .one_or_none()
+                    )
                     if not q:
                         continue
                     movie_obj.genres.append(q)

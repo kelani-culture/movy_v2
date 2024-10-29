@@ -1,7 +1,9 @@
-from typing import Annotated
+from datetime import date
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from fastapi.responses import JSONResponse
+from pydantic import HttpUrl
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -10,7 +12,7 @@ from schemas.theatre_schema import (
     TheatreAddressSchema,
     TheatreHall,
     TheatreInfo,
-    TheatreMovieStream,
+    TheatreMovie,
     TheatreResponse,
 )
 from schemas.user_schema import (
@@ -27,9 +29,11 @@ from services.auth import (
     user_login,
 )
 from services.theatre import (
+    all_movies,
     create_theatre_address,
     create_theatre_halls_seats,
     get_theatre_detail,
+    theatre_create_movie,
 )
 
 routers = APIRouter(prefix="/theatre/auth", tags=["Theatre Auth"])
@@ -119,14 +123,62 @@ def get_theatre_info(
     return theatre
 
 
-@profile_routers.post("/theatre-movie/create")
-def theatre_create_movies(
-    data: Annotated[TheatreMovieStream, Form(...)],
+@profile_routers.post("/create-movie", status_code=201)
+def create_movie(
+    title: Annotated[str, Form(...)],
+    summary: Annotated[str | None, Form(...)],
+    status: Annotated[str, Form(...)],
+    duration_in_min: Annotated[int, Form(...)],
+    genres: Annotated[List[str], Form(...)],
+    trailer_link: Annotated[HttpUrl, Form(...)],
+    tagline: Annotated[str | None, Form(...)],
+    release_date: Annotated[date, Form(...)],
     poster_path: Annotated[UploadFile, Form(...)],
     backdrop_path: Annotated[UploadFile, Form(...)],
     db: Session = Depends(get_db),
-    theatre: Theatre = Depends(get_current_user_or_theatre)
+    theatre: Theatre = Depends(get_current_user_or_theatre),
 ):
     """
     create theatre movie routes
     """
+    theatre_create_movie(
+        db,
+        theatre,
+        title=title,
+        summary=summary,
+        duration_in_min=duration_in_min,
+        genres=genres,
+        trailer_link=trailer_link,
+        tagline=tagline,
+        release_date=release_date,
+        poster_path=poster_path,
+        backdrop_path=backdrop_path,
+        status=status,
+    )
+
+    return {"message": "Movie added successfully", "status_code": 201}
+
+
+@profile_routers.get("/all-movies", response_model=List[TheatreMovie])
+def get_all_movies(
+    db: Session = Depends(get_db),
+    theatre: Theatre = Depends(get_current_user_or_theatre),
+):
+    """
+    get all movies uploaded
+    """
+    print(all_movies(db))
+    return all_movies(db)
+
+
+# TODO  write both the update and delete endpoint for theatre movies
+# @profile_routers.patch("/update-movies")
+# def update_movies(
+
+#     db: Session, theatre: Theatre = Depends(get_current_user_or_theatre)):
+#     """
+#     update movie info
+#     """
+#     return all_movies(db)
+
+

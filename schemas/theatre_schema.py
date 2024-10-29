@@ -1,7 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime, time
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, HttpUrl, computed_field, field_validator
+
+from models.movie_model import MovieStatus
 
 
 class TheatreAddressSchema(BaseModel):
@@ -63,7 +65,6 @@ class TheatreMovieStream(BaseModel):
     release_date: datetime
 
 
-
 # theatre hall
 class TheatreSeats(BaseModel):
     id: int
@@ -81,3 +82,35 @@ class TheatreInfo(TheatreResponse):
     theatre_halls: List[TheatreHallsResponse]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class Genre(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+class TheatreMovie(BaseModel):
+    u_id: str
+    title: str
+    status: MovieStatus
+    summary: str | None = None
+    tagline: str | None = None
+    duration_in_min: int
+    release_date: date
+    trailer_link: HttpUrl
+    added_at: datetime
+    updated_at: datetime | None = None
+    poster_path: str
+    backdrop_path: str
+    genres: List[Genre]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+class TheatreShowTime(BaseModel):
+    movie_id: str
+    theatre_hall_id: int
+    stream_date: date
+    start_time: time
+    end_time: time
