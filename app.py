@@ -11,23 +11,27 @@ from exception import (
     ImageErrorException,
     InvalidAccessTokenProvided,
     InvalidEmailOrPassword,
+    MovieException,
     MovyBaseApiException,
+    TheatreHallException,
     UserAlreadyExistException,
     UserNotFound,
 )
 from routers.theatre import profile_routers as theatre_profile_routes
-from routers.theatre import routers as theatre_router
+from routers.theatre import routers as theatre_routes
 from routers.users import profile as user_profile_routes
-from routers.users import routers as user_router
+from routers.users import routers as user_routes
+from routers.showtime import routers as showtime_routes
 from schemas.settings import STATIC_DIRECTORY
 
 app = FastAPI()
 
 
-app.include_router(user_router)
+app.include_router(user_routes)
 app.include_router(user_profile_routes)
 app.include_router(theatre_profile_routes)
-app.include_router(theatre_router)
+app.include_router(theatre_routes)
+app.include_router(showtime_routes)
 
 
 # static file location
@@ -114,5 +118,22 @@ app.add_exception_handler(
     exc_class_or_status_code=ImageErrorException,
     handler=create_exception_handler(
         status_code=status.HTTP_400_BAD_REQUEST, err_msg="Invalid image file"
+    ),
+)
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=TheatreHallException,
+    handler=create_exception_handler(
+        status_code=status.HTTP_404_NOT_FOUND, err_msg="Theatre Hall does not exists"
+    ),
+)
+
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=MovieException,
+    handler=create_exception_handler(
+        status_code=status.HTTP_404_NOT_FOUND, err_msg="Movie not found"
     ),
 )

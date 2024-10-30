@@ -14,6 +14,7 @@ from schemas.theatre_schema import (
     TheatreInfo,
     TheatreMovie,
     TheatreResponse,
+    TheatreShowTime,
 )
 from schemas.user_schema import (
     ProfilePicResponse,
@@ -33,6 +34,7 @@ from services.theatre import (
     create_theatre_address,
     create_theatre_halls_seats,
     get_theatre_detail,
+    show_time_theatre,
     theatre_create_movie,
 )
 
@@ -167,7 +169,6 @@ def get_all_movies(
     """
     get all movies uploaded
     """
-    print(all_movies(db))
     return all_movies(db)
 
 
@@ -182,3 +183,16 @@ def get_all_movies(
 #     return all_movies(db)
 
 
+@profile_routers.post("/create-showtime", status_code=201)
+def create_theatre_show_time(
+    show: TheatreShowTime,
+    db: Session = Depends(get_db),
+    theatre: Theatre = Depends(get_current_user_or_theatre),
+):
+    """
+    showtime routes
+    """
+    show_time_theatre(db, show.model_dump())
+    return JSONResponse(
+        content={"message": "Theatre show time added successfully"}, status_code=201
+    )

@@ -70,8 +70,12 @@ class Movie(Base):
         secondary=movie_genres, back_populates="movies"
     )
 
+
+    # @property
+    # def url(self):
+    #     return ...
     # from .theatre_model import ShowTime
-    showtime = relationship("ShowTime", back_populates="movies")
+    # showtime = relationship("ShowTime", back_populates="movies")
     # directors: Mapped[List["Director"]] = relationship(
     #     secondary=movie_directors, back_populates="movies"
     # )

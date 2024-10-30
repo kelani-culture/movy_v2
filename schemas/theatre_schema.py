@@ -114,3 +114,4 @@ class TheatreShowTime(BaseModel):
     stream_date: date
     start_time: time
     end_time: time
+    ticket_expire_time: datetime

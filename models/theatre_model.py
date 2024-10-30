@@ -120,7 +120,7 @@ class TheatreHall(Base):
     theatre: Mapped[Theatre] = relationship(Theatre, back_populates="theatre_halls")
     seats: Mapped[List["Seat"]] = relationship("Seat", back_populates="theatre_halls")
 
-    booking: Mapped["Booking"] = relationship(Theatre, back_populates="theatre_halls")
+    booking: Mapped["Booking"] = relationship("Booking", back_populates="theatre_halls")
     showtime: Mapped["ShowTime"] = relationship(
         "ShowTime", back_populates="theatre_halls"
     )
@@ -172,10 +172,10 @@ class ShowTime(Base):
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(onupdate=func.now(), nullable=True)
     booking: Mapped["Booking"] = relationship("Booking", back_populates="showtime")
 
-    movies: Mapped[List[Movie]] = relationship(Movie, back_populates="showtime")
+    movies: Mapped[Movie] = relationship(Movie, backref="showtime")
     theatre_halls: Mapped[List[TheatreHall]] = relationship(
         TheatreHall, back_populates="showtime"
     )
@@ -197,19 +197,19 @@ class Booking(Base):
 
     added_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     user: Mapped[List[User]] = relationship(User,  backref="booking")
-    theatre_halls: Mapped[TheatreHall] = relationship(Theatre, back_populates="booking")
+    theatre_halls: Mapped[TheatreHall] = relationship(TheatreHall, back_populates="booking")
     seats: Mapped[List[Seat]] = relationship(Seat, back_populates="booking")
     showtime: Mapped[ShowTime] = relationship(ShowTime, back_populates="booking")
-    ticket: Mapped["Booking"] = relationship("Booking", back_populates="booking")
+    ticket: Mapped["Ticket"] = relationship("Ticket", back_populates="booking")
 
 
 class Ticket(Base):
     __tablename__ = "ticket"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    issued_at: Mapped[datetime] = mapped_column(onupdate=func.now())
-    expires_at: Mapped[datetime] = mapped_column()
-    token: Mapped[str] = mapped_column(String(200))
+    issued_at: Mapped[datetime] = mapped_column(onupdate=func.now(), nullable=True)
+    expires_at: Mapped[datetime]
+    token: Mapped[str] = mapped_column(String(200), nullable=True)
     booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"), nullable=True)
 
     booking: Mapped[Booking] = relationship(Booking, back_populates="ticket")

@@ -1,13 +1,15 @@
-from datetime import date, datetime
+from datetime import datetime, time
 from typing import Dict, List
 
 from sqlalchemy.orm import Session
 
-from models.theatre_model import Address, Theatre, TheatreHall
-from models.movie_model import Movie, Genre
+from exception import MovieException, TheatreHallException
+from models.movie_model import Genre, Movie
+from models.theatre_model import Address, ShowTime, Theatre, TheatreHall, Ticket
+from schemas.settings import STATIC_DIRECTORY
 from utils.create_seats import generate_theatre_seats
 from utils.handle_image import image_upload
-from schemas.settings import STATIC_DIRECTORY
+
 
 def create_theatre_address(
     db: Session, data: Dict[str, str], theatre: Theatre
@@ -55,7 +57,6 @@ def get_theatre_detail(db: Session, theatre: Theatre) -> Theatre:
     return db.query(Theatre).filter(Theatre.id == theatre.id).first()
 
 
-
 def theatre_create_movie(db: Session, theatre, **kwargs) -> None:
     """
     handles theatre create movie
@@ -76,7 +77,7 @@ def theatre_create_movie(db: Session, theatre, **kwargs) -> None:
             genre = Genre(name=gen)
             db.add(genre)
         n_genre.append(genre)
-        
+
     movie = Movie(**kwargs)
     movie.backdrop_path = backdrop_path
     movie.poster_path = poster_path
@@ -85,9 +86,33 @@ def theatre_create_movie(db: Session, theatre, **kwargs) -> None:
     db.commit()
 
 
-
 def all_movies(db: Session) -> List[Movie]:
     """
     return all movies
     """
     return db.query(Movie).all()
+
+
+def show_time_theatre(db: Session, data: Dict[str, str | datetime | time]):
+    """
+    theatre show time
+    """
+    ticket_ex = data.pop("ticket_expire_time")
+    tHall_id = data.pop("theatre_hall_id")
+    theatre_hall = db.query(TheatreHall).filter(TheatreHall.id == tHall_id).first()
+
+    m_id = data.pop("movie_id")
+    movie = db.query(Movie).filter(Movie.u_id == m_id).first()
+
+    if not movie:
+        raise MovieException("Movie not found")
+    if not theatre_hall:
+        raise TheatreHallException("Theatre Hall does not exists")
+    ticket = Ticket(expires_at=ticket_ex)
+    db.add(ticket)
+    showtime = ShowTime(**data)
+    showtime.movies = movie
+    showtime.theatre_halls = theatre_hall
+    db.add(showtime)
+
+    db.commit()
