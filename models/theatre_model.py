@@ -3,7 +3,6 @@ from enum import Enum
 from time import time
 from typing import List, Optional
 
-
 from nanoid import generate
 from sqlalchemy import (
     CheckConstraint,
@@ -186,18 +185,28 @@ class BookingStatus(str, Enum):
     SOLD = "SOLD"
     PENDING = "PENDING"
 
+
 class Booking(Base):
     __tablename__ = "booking"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    booking_status: Mapped[str] = mapped_column(String(8), nullable=False, default=BookingStatus.PENDING)
+    u_id: Mapped[str] = mapped_column(
+        String(100), default=lambda: generate(), unique=True
+    )
+    booking_status: Mapped[str] = mapped_column(
+        String(8), nullable=False, default=BookingStatus.PENDING
+    )
     showtime_id: Mapped[int] = mapped_column(ForeignKey("show_time.id"))
     seat_id: Mapped[int] = mapped_column(ForeignKey("seats.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     theatre_hall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
 
-    added_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
-    user: Mapped[List[User]] = relationship(User,  backref="booking")
-    theatre_halls: Mapped[TheatreHall] = relationship(TheatreHall, back_populates="booking")
+    added_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(), nullable=False
+    )
+    user: Mapped[List[User]] = relationship(User, backref="booking")
+    theatre_halls: Mapped[TheatreHall] = relationship(
+        TheatreHall, back_populates="booking"
+    )
     seats: Mapped[List[Seat]] = relationship(Seat, back_populates="booking")
     showtime: Mapped[ShowTime] = relationship(ShowTime, back_populates="booking")
     ticket: Mapped["Ticket"] = relationship("Ticket", back_populates="booking")

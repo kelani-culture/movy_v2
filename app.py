@@ -13,15 +13,16 @@ from exception import (
     InvalidEmailOrPassword,
     MovieException,
     MovyBaseApiException,
+    PermissionNotAllowed,
     TheatreHallException,
     UserAlreadyExistException,
     UserNotFound,
 )
+from routers.showtime import routers as showtime_routes
 from routers.theatre import profile_routers as theatre_profile_routes
 from routers.theatre import routers as theatre_routes
 from routers.users import profile as user_profile_routes
 from routers.users import routers as user_routes
-from routers.showtime import routers as showtime_routes
 from schemas.settings import STATIC_DIRECTORY
 
 app = FastAPI()
@@ -130,10 +131,17 @@ app.add_exception_handler(
 )
 
 
-
 app.add_exception_handler(
     exc_class_or_status_code=MovieException,
     handler=create_exception_handler(
         status_code=status.HTTP_404_NOT_FOUND, err_msg="Movie not found"
+    ),
+)
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=PermissionNotAllowed,
+    handler=create_exception_handler(
+        status_code=status.HTTP_403_FORBIDDEN, err_msg="Unauthorized access"
     ),
 )

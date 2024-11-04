@@ -114,8 +114,7 @@ def decode_user_token(token: str) -> TokenPayload:
             raise AccountDisabled("User account has been disabled please contact admin")
 
         user = TokenPayload(**user_info)
-    except (InvalidTokenError, InvalidAudienceError) as e:
-        print(e)
+    except (InvalidTokenError, InvalidAudienceError):
         raise InvalidAccessTokenProvided("Invalid token provided or token expired")
 
     return user

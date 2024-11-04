@@ -1,7 +1,7 @@
+from datetime import date, time
 from typing import List
 
-from fastapi import Request
-from pydantic import BaseModel, ConfigDict, HttpUrl, computed_field
+from pydantic import BaseModel, ConfigDict, computed_field
 
 
 class Genre(BaseModel):
@@ -12,7 +12,8 @@ class Genre(BaseModel):
 class MovieStream(BaseModel):
     u_id: str
     title: str
-    tagline: str
+    tagline: str | None = None
+    status: str
     poster_path: str
     genres: List[Genre]
 
@@ -21,3 +22,37 @@ class MovieStream(BaseModel):
         return f"/movie/{self.u_id}"
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class Seat(BaseModel):
+    row_name: str
+    seat: int
+    status: str
+
+
+class TheatreHall(BaseModel):
+    id: int
+    capacity: int
+    name: str
+    seats: List[Seat]
+
+
+class ShowTime(BaseModel):
+    u_id: str
+    stream_date: date
+    start_time: time
+    end_time: time
+    theatre_halls: TheatreHall
+
+
+class MovieDetailStream(BaseModel):
+    u_id: str
+    title: str
+    tagline: str | None = None
+    summary: str | None = None
+    status: str
+    poster_path: str
+    backdrop_path: str
+    genres: List[Genre]
+
+    showtime: List[ShowTime]

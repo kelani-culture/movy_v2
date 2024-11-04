@@ -11,6 +11,7 @@ from exception import (
     BearerNotFoundInParsedToken,
     EmailNotVerified,
     InvalidEmailOrPassword,
+    PermissionNotAllowed,
     UserAlreadyExistException,
     UserNotFound,
 )
@@ -126,14 +127,6 @@ def update_profile_pic(
     """
     handle user profile update
     """
-    # try:
-    #     image = Image.open(file.file)
-    #     image.verify()
-    # except UnidentifiedImageError:
-    #     raise ImageErrorException("Invalid image file")
-
-    # # reset the upload file
-    # file.file.seek(0)
 
     file_location = (
         STATIC_DIRECTORY
@@ -141,15 +134,21 @@ def update_profile_pic(
         / type_user
         / f"{datetime.date(datetime.now())}"
     )
-    # file_location.mkdir(exist_ok=True, parents=True)
-
-    # file_location = file_location / file.filename
-    # with file_location.open("wb") as pic:
-    #     shutil.copyfileobj(file.file, pic)
-
-    # relative_path = file_location.relative_to(STATIC_DIRECTORY.parent)
     obj.profile_pic = image_upload(file_location, file)
     db.commit()
     db.refresh(obj)
 
     return obj.profile_pic
+
+
+def get_user(user: User = Depends(get_current_user_or_theatre)) -> User:
+    if not isinstance(user, User):
+        raise PermissionNotAllowed("Theatre not allowed")
+    return user
+
+
+def get_theatre(theatre: Theatre = Depends(get_current_user_or_theatre)) -> Theatre:
+    if not isinstance(theatre, Theatre) and theatre.is_admin is False:
+        raise PermissionNotAllowed("User not allowed")
+
+    return theatre

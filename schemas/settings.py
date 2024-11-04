@@ -19,13 +19,16 @@ class Settings(BaseSettings):
     local_db_password: str
     local_hostname: str
 
+
+    redis_host: str
+    redis_port: int
     tmdb_access_token: str
     tmdb_api_key: str
 
     access_token_secret_key: str
     refresh_token_secret_key: str
 
-    ACCESS_TOKEN_EXPIRE_MIN: int = 5
+    ACCESS_TOKEN_EXPIRE_MIN: int = 60
     REFRESH_TOKEN_EXPIRE_MIN: int = 60
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 

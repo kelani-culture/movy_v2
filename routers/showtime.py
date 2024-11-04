@@ -1,13 +1,15 @@
 from typing import List
-from fastapi import APIRouter, Depends, Request
+
+from fastapi import APIRouter, Depends, Request, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
+
 from database import get_db
-from schemas.showtime_schema import MovieStream
-from services.showtime import stream_movies
+from models.movie_model import MovieStatus
+from schemas.showtime_schema import MovieDetailStream, MovieStream
+from services.manager import ConnectionManager
+from services.showtime import movie_info, stream_movies
 
-routers = APIRouter(prefix="/movies")
-
-
+routers = APIRouter(prefix="/movies", tags=["Movies"])
 
 
 @routers.get("/", response_model=List[MovieStream], status_code=200)
@@ -15,4 +17,40 @@ def movie_streaming(request: Request, db: Session = Depends(get_db)):
     """
     movie stream routes
     """
-    return stream_movies(db)
+    return stream_movies(db, MovieStatus.RELEASED)
+
+
+@routers.get("/upcoming", response_model=List[MovieStream], status_code=200)
+def upcoming_movies(db: Session = Depends(get_db)):
+    """
+    upcoming movies
+    """
+    return stream_movies(db, MovieStatus.UPCOMING)
+
+
+@routers.get("/{movie_id}", response_model=MovieDetailStream)
+def movie_detail(movie_id: str, db: Session = Depends(get_db)):
+    """
+    movie details
+    """
+    return movie_info(db, movie_id)
+
+
+manager = ConnectionManager()
+
+
+@routers.websocket("/book/{showtime_id}")
+async def booking(
+    websocket: WebSocket, showtime_id: str, db: Session = Depends(get_db)
+):
+    try:
+        await manager.connect(websocket, db)
+        while True:
+            data = await websocket.receive_json()
+            print(data)
+            await manager.seat_booking(websocket, db, showtime_id)
+    except ValueError:
+        await websocket.send_json({"error": "Invalid Json body parsed"})
+        await websocket.close(close=1008)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
