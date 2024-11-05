@@ -29,10 +29,11 @@ class Seat(BaseModel):
     seat: int
     status: str
 
-
+class AvailableSeat(BaseModel):
+    available_seats: int
 class TheatreHall(BaseModel):
     id: int
-    capacity: int
+    seat_booked:  AvailableSeat
     name: str
     seats: List[Seat]
 

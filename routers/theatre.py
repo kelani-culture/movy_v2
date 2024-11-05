@@ -90,13 +90,6 @@ def theatre_address(
     return theatre
 
 
-# @profile_routers.post(
-#     "/movie"
-# )
-# def theatre_movie_streams():
-#     ...
-
-
 @profile_routers.post(
     "/theatre-hall/create", response_model=TheatreResponse, status_code=201
 )

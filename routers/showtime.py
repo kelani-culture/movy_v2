@@ -6,10 +6,13 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.movie_model import MovieStatus
 from schemas.showtime_schema import MovieDetailStream, MovieStream
-from services.manager import ConnectionManager
+from services.manager import ConnectionManager, handle_user_booking
 from services.showtime import movie_info, stream_movies
 
 routers = APIRouter(prefix="/movies", tags=["Movies"])
+
+
+manager = ConnectionManager()
 
 
 @routers.get("/", response_model=List[MovieStream], status_code=200)
@@ -36,21 +39,20 @@ def movie_detail(movie_id: str, db: Session = Depends(get_db)):
     return movie_info(db, movie_id)
 
 
-manager = ConnectionManager()
-
-
 @routers.websocket("/book/{showtime_id}")
 async def booking(
-    websocket: WebSocket, showtime_id: str, db: Session = Depends(get_db)
+    websocket: WebSocket,
+    showtime_id: str,
+    db: Session = Depends(get_db),
 ):
+    await manager.connect(websocket)
     try:
-        await manager.connect(websocket, db)
         while True:
             data = await websocket.receive_json()
-            print(data)
-            await manager.seat_booking(websocket, db, showtime_id)
+            seat_update = await handle_user_booking(websocket, db, showtime_id, data)
+            await manager.seat_booking(seat_update)
     except ValueError:
         await websocket.send_json({"error": "Invalid Json body parsed"})
-        await websocket.close(close=1008)
+        # await websocket.close(close=1008)
     except WebSocketDisconnect:
         manager.disconnect(websocket)

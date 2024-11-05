@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from exception import MovieException, TheatreHallException
 from models.movie_model import Genre, Movie
-from models.theatre_model import Address, ShowTime, Theatre, TheatreHall, Ticket
+from models.theatre_model import Address, SeatBooked, ShowTime, Theatre, TheatreHall, Ticket
 from schemas.settings import STATIC_DIRECTORY
 from utils.create_seats import generate_theatre_seats
 from utils.handle_image import image_upload
@@ -41,6 +41,9 @@ def create_theatre_halls_seats(
 
     theatre.theatre_halls.append(theatre_hall)
 
+    seat_booked = SeatBooked(available_seats=data["capacity"])
+    seat_booked.theatre_halls = theatre_hall
+    db.add(seat_booked)
     total_row = data["total_row"]
     seats_per_row = data["seats_per_row"]
     seats = generate_theatre_seats(db, total_row, seats_per_row)
@@ -103,7 +106,6 @@ def show_time_theatre(db: Session, data: Dict[str, str | datetime | time]):
 
     m_id = data.pop("movie_id")
     movie = db.query(Movie).filter(Movie.u_id == m_id).first()
-
     if not movie:
         raise MovieException("Movie not found")
     if not theatre_hall:

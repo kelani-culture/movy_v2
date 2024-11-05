@@ -46,6 +46,14 @@ theatre_address = Table(
 )
 
 
+booking_seats = Table(
+    "booking_seat",
+    Base.metadata,
+    Column("seat_id", ForeignKey("seats.id")),
+    Column("booking_id", ForeignKey("booking.id")),
+)
+
+
 class Theatre(AbstractBaseUser):
     __tablename__ = "theatres"
     name: Mapped[str] = mapped_column(
@@ -120,11 +128,14 @@ class TheatreHall(Base):
     seats: Mapped[List["Seat"]] = relationship("Seat", back_populates="theatre_halls")
 
     booking: Mapped["Booking"] = relationship("Booking", back_populates="theatre_halls")
+    seat_booked: Mapped["SeatBooked"] = relationship(
+        "SeatBooked", back_populates="theatre_halls"
+    )
     showtime: Mapped["ShowTime"] = relationship(
         "ShowTime", back_populates="theatre_halls"
     )
     __table_args__ = (
-        CheckConstraint("total_rows >= 0", name="check_total_rows_non_negative"),
+        CheckConstraint("total_row >= 0", name="check_total_rows_non_negative"),
         CheckConstraint("seats_per_row >= 0", name="check_seats_per_row_non_negative"),
     )
 
@@ -146,7 +157,9 @@ class Seat(Base):
     theatre_halls: Mapped[TheatreHall] = relationship(
         TheatreHall, back_populates="seats"
     )
-    booking: Mapped["Booking"] = relationship("Booking", back_populates="seats")
+    booking: Mapped[List["Booking"]] = relationship(
+        secondary=booking_seats, back_populates="seats"
+    )
 
     __table_args__ = (
         UniqueConstraint(
@@ -156,6 +169,12 @@ class Seat(Base):
             name="uq_theatre_hall_id_row_name_seat_row",
         ),
     )
+
+    def __str__(self):
+        return f"{self.row_name} {self.seat} theatre_hall -> {self.theatre_hall_id}"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class ShowTime(Base):
@@ -196,10 +215,8 @@ class Booking(Base):
         String(8), nullable=False, default=BookingStatus.PENDING
     )
     showtime_id: Mapped[int] = mapped_column(ForeignKey("show_time.id"))
-    seat_id: Mapped[int] = mapped_column(ForeignKey("seats.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     theatre_hall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
-
     added_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), nullable=False
     )
@@ -207,7 +224,9 @@ class Booking(Base):
     theatre_halls: Mapped[TheatreHall] = relationship(
         TheatreHall, back_populates="booking"
     )
-    seats: Mapped[List[Seat]] = relationship(Seat, back_populates="booking")
+    seats: Mapped[List[Seat]] = relationship(
+        secondary=booking_seats, back_populates="booking"
+    )
     showtime: Mapped[ShowTime] = relationship(ShowTime, back_populates="booking")
     ticket: Mapped["Ticket"] = relationship("Ticket", back_populates="booking")
 
@@ -222,3 +241,22 @@ class Ticket(Base):
     booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"), nullable=True)
 
     booking: Mapped[Booking] = relationship(Booking, back_populates="ticket")
+
+
+class SeatBooked(Base):
+    __tablename__ = "seat_booked"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    # row_name: Mapped[str] = mapped_column(String(1), nullable=True)
+    available_seats: Mapped[int] = mapped_column(nullable=True)
+    # total_seats: Mapped[int]
+    theatrehall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
+    added_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(onupdate=func.now(), nullable=True)
+
+    theatre_halls: Mapped[TheatreHall] = relationship(
+        TheatreHall, back_populates="seat_booked"
+    )
+
+    __table_args__ = (
+        CheckConstraint("available_seats >= 0", name="check_available_seats_non_negative"),
+    )
