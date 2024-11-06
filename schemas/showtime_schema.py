@@ -1,4 +1,5 @@
 from datetime import date, time
+from decimal import Decimal
 from typing import List
 
 from pydantic import BaseModel, ConfigDict, computed_field
@@ -29,11 +30,14 @@ class Seat(BaseModel):
     seat: int
     status: str
 
+
 class AvailableSeat(BaseModel):
     available_seats: int
+
+
 class TheatreHall(BaseModel):
     id: int
-    seat_booked:  AvailableSeat
+    seat_booked: AvailableSeat
     name: str
     seats: List[Seat]
 
@@ -57,3 +61,21 @@ class MovieDetailStream(BaseModel):
     genres: List[Genre]
 
     showtime: List[ShowTime]
+
+class ShowTime(BaseModel):
+    u_id: str
+    stream_date: date
+    start_time: time
+    end_time: time
+    price: Decimal
+
+class Theatrehall(BaseModel):
+    id: int
+    name: str
+
+class BookingDetail(BaseModel):
+    u_id: str
+    booking_status: str
+    theatre_halls: Theatrehall 
+    showtime: ShowTime
+    seats: List[Seat]

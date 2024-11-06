@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from exception import (
     AccountDisabled,
     BearerNotFoundInParsedToken,
+    BookingMissingException,
     EmailNotVerified,
     ImageErrorException,
     InvalidAccessTokenProvided,
@@ -18,7 +19,7 @@ from exception import (
     UserAlreadyExistException,
     UserNotFound,
 )
-from routers.showtime import routers as showtime_routes
+from routers.showtime import routers as showtime_routes, booking_route
 from routers.theatre import profile_routers as theatre_profile_routes
 from routers.theatre import routers as theatre_routes
 from routers.users import profile as user_profile_routes
@@ -33,7 +34,7 @@ app.include_router(user_profile_routes)
 app.include_router(theatre_profile_routes)
 app.include_router(theatre_routes)
 app.include_router(showtime_routes)
-
+app.include_router(booking_route)
 
 # static file location
 
@@ -143,5 +144,13 @@ app.add_exception_handler(
     exc_class_or_status_code=PermissionNotAllowed,
     handler=create_exception_handler(
         status_code=status.HTTP_403_FORBIDDEN, err_msg="Unauthorized access"
+    ),
+)
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=BookingMissingException,
+    handler=create_exception_handler(
+        status_code=status.HTTP_404_NOT_FOUND, err_msg="Movie not found"
     ),
 )

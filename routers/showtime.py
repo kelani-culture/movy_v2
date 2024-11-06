@@ -5,12 +5,14 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models.movie_model import MovieStatus
-from schemas.showtime_schema import MovieDetailStream, MovieStream
-from services.manager import ConnectionManager, handle_user_booking
-from services.showtime import movie_info, stream_movies
+from models.user_model import User
+from schemas.showtime_schema import BookingDetail, MovieDetailStream, MovieStream
+from services.auth import get_user
+from services.manager import ConnectionManager
+from services.showtime import get_user_booking, movie_info, stream_movies
 
 routers = APIRouter(prefix="/movies", tags=["Movies"])
-
+booking_route = APIRouter(prefix="/booking", tags=["Book Movie"])
 
 manager = ConnectionManager()
 
@@ -39,7 +41,15 @@ def movie_detail(movie_id: str, db: Session = Depends(get_db)):
     return movie_info(db, movie_id)
 
 
-@routers.websocket("/book/{showtime_id}")
+@booking_route.get("/", response_model=BookingDetail)
+def get_all_booking(db: Session = Depends(get_db), user: User = Depends(get_user)):
+    """
+    handle booking routes
+    """
+    return get_user_booking(db, user)
+
+
+@booking_route.websocket("/{showtime_id}")
 async def booking(
     websocket: WebSocket,
     showtime_id: str,

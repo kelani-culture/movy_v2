@@ -127,7 +127,6 @@ async def handle_user_booking(
         db.add(booking)
         db.commit()
     except IntegrityError as e:
-        print(e)
         await websocket.send_json({"error": str(e)})
         # await websocket.close(code=1008)
         db.rollback()
@@ -141,3 +140,7 @@ async def handle_user_booking(
         for seat in all_seat
     ]
     return data
+
+
+async def cancel_user_booking(websocket: WebSocket, data: Dict[str, str | int]):
+    pass

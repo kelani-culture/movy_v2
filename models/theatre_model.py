@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from enum import Enum
 from time import time
 from typing import List, Optional
@@ -8,6 +9,7 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     ForeignKey,
+    Numeric,
     String,
     Table,
     Text,
@@ -185,6 +187,7 @@ class ShowTime(Base):
     )
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
     theatre_hall_id: Mapped[int] = mapped_column(ForeignKey("theatre_halls.id"))
+    price: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=0)
     stream_date: Mapped[date] = mapped_column(nullable=False)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
@@ -196,6 +199,10 @@ class ShowTime(Base):
     movies: Mapped[Movie] = relationship(Movie, backref="showtime")
     theatre_halls: Mapped[List[TheatreHall]] = relationship(
         TheatreHall, back_populates="showtime"
+    )
+
+    __table_args__ = (
+        CheckConstraint("price >= 0", name="check_price_is_non_negative"),
     )
 
 
@@ -258,5 +265,7 @@ class SeatBooked(Base):
     )
 
     __table_args__ = (
-        CheckConstraint("available_seats >= 0", name="check_available_seats_non_negative"),
+        CheckConstraint(
+            "available_seats >= 0", name="check_available_seats_non_negative"
+        ),
     )
