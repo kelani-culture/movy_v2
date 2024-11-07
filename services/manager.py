@@ -18,12 +18,11 @@ from models.user_model import User
 from utils.jwt_token import decode_user_token
 
 
-async def handle_websocket_token(
-    db: Session, websocket: WebSocket, token: str | None = None
-):
+async def handle_websocket_token(db: Session, websocket: WebSocket) -> User:
     """
     websocket token
     """
+    token = websocket.headers.get("Authorization")
     user_info = None
     try:
         user_info = decode_user_token(token)
@@ -61,7 +60,7 @@ async def handle_user_booking(
     websocket: WebSocket, db: Session, showtime_id: str, data: Dict[str, List[int]]
 ) -> Dict[str, str | List[int]]:
     token = websocket.headers.get("Authorization")
-    user = await handle_websocket_token(db, websocket, token)
+    user = await handle_websocket_token(db, websocket)
     showtime = db.query(ShowTime).filter(ShowTime.u_id == showtime_id).first()
     if not showtime:
         await websocket.send_json({"error": "ShowTime  cannot be found"})
@@ -142,5 +141,13 @@ async def handle_user_booking(
     return data
 
 
-async def cancel_user_booking(websocket: WebSocket, data: Dict[str, str | int]):
-    pass
+#TODO implement the user booking cancelation as soon as I you are done with building the mobile application with flutter.....
+# happy learnign MOther.........fucker boooohoooooo yeah.......................
+async def cancel_user_booking(
+    db: Session, websocket: WebSocket, booking_id: str, data: Dict[str, str | int]
+):
+    """
+    handle user booking cancelation....
+    """
+    # token = websocket.headers.get("Authorization")
+    user = await handle_websocket_token(db, websocket)

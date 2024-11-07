@@ -8,7 +8,7 @@ from models.movie_model import MovieStatus
 from models.user_model import User
 from schemas.showtime_schema import BookingDetail, MovieDetailStream, MovieStream
 from services.auth import get_user
-from services.manager import ConnectionManager
+from services.manager import ConnectionManager, handle_user_booking
 from services.showtime import get_user_booking, movie_info, stream_movies
 
 routers = APIRouter(prefix="/movies", tags=["Movies"])
@@ -66,3 +66,13 @@ async def booking(
         # await websocket.close(close=1008)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+
+@booking_route.websocket("/cancel/{booking_id}")
+async def cancel_user_booking(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        # await manager.
+        ...
+    except WebSocketDisconnect:
+        ...
